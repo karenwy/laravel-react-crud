@@ -10,7 +10,10 @@ class ProductController extends Controller
 {
     public function index()
     {
-        return Inertia::render("Products/index", []);
+        // get all products from the product model
+        $products = Product::all();
+        //return product index page with all products
+        return Inertia::render("Products/index", compact("products"));
     }
 
     public function create()
@@ -33,5 +36,34 @@ class ProductController extends Controller
 
         //return to product index/home page
         return redirect()->route("products.index")->with("message", "Product created succesfully");
+    }
+
+    public function edit(Product $product)
+    {
+        return Inertia::render("Products/edit", compact("product"));
+    }
+
+    //request varible parsed here will get the data from the form input
+    public function update(Request $request, Product $product)
+    {
+        $request->validate([
+            "name" => "required|string|max:255",
+            "price" => "required|numeric",
+            "Description" => "nullable|string",
+        ]);
+
+        $product->update([
+            'name' => $request->input('name'),
+            'price' => $request->input('price'),
+            'description' => $request->input('description')
+        ]);
+
+        return redirect()->route('products.index')->with('message', 'Product updated sucessfully');
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->delete();
+        return redirect()->route("products.index")->with("message", "Product deleted sucessfully");
     }
 }
